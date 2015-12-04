@@ -1,0 +1,15 @@
+fixtures:
+  repositories:
+    'common': 'git://github.com/ghoneycutt/puppet-module-common.git'
+    'pam': 'git://github.com/ghoneycutt/puppet-module-pam.git'
+    'nsswitch': 'git://github.com/ghoneycutt/puppet-module-nsswitch.git'
+    'nisclient': 'git://github.com/Ericsson/puppet-module-nisclient.git'
+    'rpcbind': 'git://github.com/ghoneycutt/puppet-module-rpcbind.git'
+    'stdlib':
+      repo: 'git://github.com/puppetlabs/puppetlabs-stdlib.git'
+      ref: '4.6.0'
+    'vas':
+      repo: 'git://github.com/Ericsson/puppet-module-vas.git'
+      ref: 'v0.14.0'
+  symlinks:
+    vas_local_user: "#{source_dir}"

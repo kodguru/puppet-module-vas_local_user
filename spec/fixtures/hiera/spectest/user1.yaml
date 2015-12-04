@@ -1,0 +1,16 @@
+vas_local_user::users:
+  'user1':
+    ensure: 'present'
+    name: 'user1'
+    uid: '1001'
+    gid: '100'
+    home: '/var/lib/user1'
+    shell: '/bin/bash'
+
+vas_local_user::ssh_keys:
+  'user1':
+    ensure: 'present'
+    user: 'user1'
+    type: 'ssh-rsa'
+    target: '/var/lib/user1/.ssh/authorized_keys'
+    key: 'AAAAThisKeyIsNotValid'

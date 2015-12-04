@@ -1,0 +1,16 @@
+vas_local_user::users_hiera_merge: true
+vas_local_user::users:
+  'user2':
+    ensure: 'present'
+    uid: '1002'
+    gid: '100'
+    home: '/var/lib/user2'
+
+vas_local_user::ssh_keys_hiera_merge: true
+vas_local_user::ssh_keys:
+  'user2':
+    ensure: 'present'
+    user: 'user2'
+    type: 'ssh-rsa'
+    target: '/var/lib/user2/.ssh/authorized_keys'
+    key: 'AAAAThisKeyIsNotValid'

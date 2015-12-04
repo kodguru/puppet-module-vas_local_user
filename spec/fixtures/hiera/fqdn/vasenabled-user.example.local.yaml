@@ -1,0 +1,10 @@
+classes:
+  - vas
+
+vas_local_user::users_hiera_merge: true
+vas_local_user::users:
+  'user2':
+    ensure: 'present'
+    uid: '1002'
+    gid: '100'
+    home: '/var/lib/user2'

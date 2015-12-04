@@ -1,0 +1,17 @@
+{
+  "name": "vas_local_user",
+  "version": "0.1.0",
+  "author": "anders-larsson",
+  "summary": "Manage VAS users locally",
+  "license": "Apache-2.0",
+  "source": "git://github.com/anders-larsson/puppet-module-vas_local_user.git",
+  "project_page": "https://github.com/anders-larsson/puppet-module-vas_local_user",
+  "issues_url": null,
+  "dependencies": [
+    {
+      "name":"puppetlabs-stdlib","version_requirement":">= 1.0.0",
+      "name":"puppet-module-vas","version_requirement":">= v0.14.0"
+    }
+  ]
+}
+
