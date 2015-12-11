@@ -61,6 +61,15 @@ describe 'vas_local_user' do
       end
     end
 
+    context 'on system without VAS managed but installed' do
+
+      it 'should not contain user1' do
+        facts.merge!({'vas_version' => '4.1.0.21518',
+                      'fqdn' => 'vasenabled.example.local'})
+        should_not contain_user('user1')
+      end
+    end
+
     context 'on system without VAS' do
 
       it { should contain_user('user1').with({
@@ -111,6 +120,22 @@ describe 'vas_local_user' do
         facts.merge!({'fqdn' => 'vasenabled.example.local'})
         should contain_ssh_authorized_key('user1')
       end
+    end
+
+    context 'on system without VAS managed but installed' do
+
+      it 'should not contain user1' do
+        facts.merge!({'vas_version' => '4.1.0.21518',
+                      'fqdn' => 'vasenabled.example.local'})
+        should_not contain_user('user1')
+      end
+
+      it 'should not contain user1\'s ssh_authorized_keys' do
+        facts.merge!({'vas_version' => '4.1.0.21518',
+                      'fqdn' => 'vasenabled.example.local'})
+        should_not contain_ssh_authorized_key('user1')
+      end
+
     end
 
     context 'on system with VAS managed and installed' do
@@ -206,6 +231,34 @@ describe 'vas_local_user' do
 
       end
 
+      context 'on system without VAS managed but installed' do
+
+        it 'should not contain user user1' do
+          facts.merge!({'vas_version' => '4.1.0.21518',
+                        'fqdn' => 'vasenabled-user.example.local',
+                        'spectest'  => 'user1'})
+          should_not contain_user('user1')
+        end
+        it 'should not contain user user2' do
+          facts.merge!({'vas_version' => '4.1.0.21518',
+                        'fqdn' => 'vasenabled-user.example.local',
+                        'spectest'  => 'user1'})
+          should_not contain_user('user2')
+        end
+        it 'should not contain ssh_authorized_keys for user2' do
+          facts.merge!({'vas_version' => '4.1.0.21518',
+                        'fqdn' => 'vasenabled-user.example.local',
+                        'spectest'  => 'user1'})
+          should_not contain_ssh_authorized_key('user1')
+        end
+        it 'should not contain ssh_authorized_keys for user2' do
+          facts.merge!({'fqdn'      => 'vasenabled-user.example.local',
+                        'spectest'  => 'user1'})
+          should_not contain_ssh_authorized_key('user2')
+        end
+
+      end
+
       context 'on system without VAS' do
         it 'should contain user user1' do
           facts.merge!({'fqdn'      => 'vasdisabled-user.example.local',
@@ -267,6 +320,34 @@ describe 'vas_local_user' do
             'class vas { }
             include vas'
         }
+
+        it 'should not contain user user1' do
+          facts.merge!({'vas_version' => '4.1.0.21518',
+                        'fqdn'        => 'vasenabled-userkey.example.local',
+                        'spectest'    => 'user1'})
+          should_not contain_user('user1')
+        end
+        it 'should not contain user user2' do
+          facts.merge!({'vas_version' => '4.1.0.21518',
+                        'fqdn'        => 'vasenabled-userkey.example.local',
+                        'spectest'    => 'user1'})
+          should_not contain_user('user2')
+        end
+        it 'should not contain ssh_authorized_keys for user1' do
+          facts.merge!({'vas_version' => '4.1.0.21518',
+                        'fqdn'        => 'vasenabled-userkey.example.local',
+                        'spectest'    => 'user1'})
+          should_not contain_ssh_authorized_key('user1')
+        end
+        it 'should not contain ssh_authorized_keys for user2' do
+          facts.merge!({'vas_version' => '4.1.0.21518',
+                        'fqdn'        => 'vasenabled-userkey.example.local',
+                        'spectest'    => 'user1'})
+          should_not contain_ssh_authorized_key('user2')
+        end
+      end
+
+      context 'on system without VAS managed but installed' do
 
         it 'should not contain user user1' do
           facts.merge!({'vas_version' => '4.1.0.21518',

@@ -48,12 +48,16 @@ class vas_local_user(
       'before'      => Class['vas'],
     })
 
-    if defined(Class['vas']) {
-      if ! $::vas_version {
+    if defined(Class['vas']) { # VAS managed
+      if $::vas_version { # VAS installed
+        # Do nothing right now
+      } else { # VAS not installed yet
         create_resources(user, $users_real, $vasdefaults)
         $user_managed = true
       }
-    } else {
+    } elsif $::vas_version { # Vas NOT managed but installed
+      # Do nothing right now
+    } else { # VAS NOT managed nor installed
       create_resources(user, $users_real, $defaults)
       $user_managed = true
     }
