@@ -41,23 +41,36 @@ class vas_local_user(
     validate_hash($users_real)
 
     $defaults = {
-      'managehome' => true,
+      'managehome'  => true,
     }
+
     $vasdefaults = merge($defaults, {
       'forcelocal'  => true,
       'before'      => Class['vas'],
     })
 
-    if defined(Class['vas']) { # VAS managed
-      if $::vas_version { # VAS installed
-        # Do nothing right now
-      } else { # VAS not installed yet
-        create_resources(user, $users_real, $vasdefaults)
-        $user_managed = true
-      }
-    } elsif $::vas_version { # Vas NOT managed but installed
-      # Do nothing right now
-    } else { # VAS NOT managed nor installed
+
+    if defined(Class['vas']) {
+      $vas_managed = true
+    } else {
+      $vas_managed = false
+    }
+
+    if $::vas_version {
+      $vas_installed = true
+    } else {
+      $vas_installed = false
+    }
+
+    if $vas_managed and $vas_installed {
+    }
+    elsif $vas_managed and ! $vas_installed {
+      create_resources(user, $users_real, $vasdefaults)
+      $user_managed = true
+    }
+    elsif ! $vas_managed and $vas_installed {
+    }
+    elsif ! $vas_managed and ! $vas_installed {
       create_resources(user, $users_real, $defaults)
       $user_managed = true
     }
@@ -65,7 +78,5 @@ class vas_local_user(
     if $user_managed == true and is_hash($ssh_keys_real) {
       create_resources(ssh_authorized_key, $ssh_keys_real)
     }
-
   }
-
 }
