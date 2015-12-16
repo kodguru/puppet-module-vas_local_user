@@ -11,6 +11,7 @@ describe 'vas_local_user' do
       :lsbmajdistrelease          => '6',
       :operatingsystemmajrelease  => '6',
       :fqdn                       => 'vasenabled.example.local',
+      :vas_version                => '4.1.0.21518',
     }
   end
 
@@ -58,7 +59,7 @@ describe 'vas_local_user' do
 #      let (:facts) { validation_facts.merge({:fqdn => 'vasenabled.example.local',
 #                                             :vas_version => '4.1.0.21518'}) }
 
-      let (:facts) { default_facts.merge({:vas_version => '4.1.0.21518'}) }
+      let (:facts) { default_facts }
 
 
       it { should_not contain_user('user1') }
@@ -68,7 +69,7 @@ describe 'vas_local_user' do
 #      let (:facts) { validation_facts.merge({:fqdn => 'vasenabled.example.local',
 #                                             :vas_version => '4.1.0.21518'}) }
 
-      let (:facts) { default_facts.merge({:vas_version => '4.1.0.21518'}) }
+      let (:facts) { default_facts }
 
       it { should_not contain_user('user1') }
     end
@@ -124,7 +125,7 @@ describe 'vas_local_user' do
 #      let (:facts) { validation_facts.merge({:fqdn => 'vasenabled.example.local',
 #                                             :vas_version => '4.1.0.21518'}) }
 
-      let (:facts) { default_facts.merge({:vas_version => '4.1.0.21518'}) }
+      let (:facts) { default_facts }
 
       it { should_not contain_user('user1') }
       it { should_not contain_ssh_authorized_key('user1') }
@@ -138,7 +139,7 @@ describe 'vas_local_user' do
 #      let (:facts) { validation_facts.merge({:fqdn => 'vasenabled.example.local',
 #                                             :vas_version => '4.1.0.21518'}) }
 
-      let (:facts) { default_facts.merge({:vas_version => '4.1.0.21518'}) }
+      let (:facts) { default_facts }
 
       it { should_not contain_user('user1') }
       it { should_not contain_ssh_authorized_key('user1') }
@@ -164,8 +165,9 @@ describe 'vas_local_user' do
 #        let (:facts) { validation_facts.merge({:fqdn => 'vasenabled-user.example.local',
 #                                               :spectest => 'user1'}) }
 
-        let (:facts) { default_facts.merge({:fqdn     => 'vasenabled-user.example.local',
-                                            :spectest => 'user1'}) }
+        let (:facts) { default_facts.merge({:fqdn        => 'vasenabled-user.example.local',
+                                            :spectest    => 'user1',
+                                            :vas_version => ''}) }
 
         it { should contain_user('user1') }
         it { should contain_user('user2') }
@@ -182,9 +184,8 @@ describe 'vas_local_user' do
 #                                               :spectest => 'user1',
 #                                               :vas_version => '4.1.0.21518'}) }
 
-        let (:facts) { default_facts.merge({:fqdn        => 'vasenabled-user.example.local',
-                                            :spectest    => 'user1',
-                                            :vas_version => '4.1.0.21518'}) }
+        let (:facts) { default_facts.merge({:fqdn     => 'vasenabled-user.example.local',
+                                            :spectest => 'user1'}) }
 
         it { should_not contain_user('user1') }
         it { should_not contain_user('user2') }
@@ -197,9 +198,8 @@ describe 'vas_local_user' do
 #                                               :spectest => 'user1',
 #                                               :vas_version => '4.1.0.21518'}) }
 
-        let (:facts) { default_facts.merge({:fqdn        => 'vasenabled-user.example.local',
-                                            :spectest    => 'user1',
-                                            :vas_version => '4.1.0.21518'}) }
+        let (:facts) { default_facts.merge({:fqdn     => 'vasenabled-user.example.local',
+                                            :spectest => 'user1',}) }
 
         it { should_not contain_user('user1') }
         it { should_not contain_user('user2') }
@@ -212,7 +212,8 @@ describe 'vas_local_user' do
 #                                               :spectest => 'user1'}) }
 
         let (:facts) { default_facts.merge({:fqdn        => 'vasdisabled-user.example.local',
-                                            :spectest    => 'user1'}) }
+                                            :spectest    => 'user1',
+                                            :vas_version => ''}) }
 
         it { should contain_user('user1') }
         it { should contain_user('user2') }
@@ -233,7 +234,8 @@ describe 'vas_local_user' do
 #                                               :spectest => 'user1'}) }
 
         let (:facts) { default_facts.merge({:fqdn        => 'vasenabled-userkey.example.local',
-                                            :spectest    => 'user1'}) }
+                                            :spectest    => 'user1',
+                                            :vas_version => ''}) }
 
         it { should contain_user('user1') }
         it { should contain_user('user2') }
@@ -250,9 +252,8 @@ describe 'vas_local_user' do
 #                                               :spectest => 'user1',
 #                                               :vas_version => '4.1.0.21518'}) }
 
-        let (:facts) { default_facts.merge({:fqdn        => 'vasenabled-userkey.example.local',
-                                            :spectest    => 'user1',
-                                            :vas_version => '4.1.0.21518'}) }
+        let (:facts) { default_facts.merge({:fqdn     => 'vasenabled-userkey.example.local',
+                                            :spectest => 'user1'}) }
 
         it { should_not contain_user('user1') }
         it { should_not contain_user('user2') }
@@ -265,9 +266,8 @@ describe 'vas_local_user' do
 #                                               :spectest => 'user1',
 #                                               :vas_version => '4.1.0.21518'}) }
 
-        let (:facts) { default_facts.merge({:fqdn        => 'vasenabled-userkey.example.local',
-                                            :spectest    => 'user1',
-                                            :vas_version => '4.1.0.21518'}) }
+        let (:facts) { default_facts.merge({:fqdn     => 'vasenabled-userkey.example.local',
+                                            :spectest => 'user1'}) }
 
         it { should_not contain_user('user1') }
         it { should_not contain_user('user2') }
@@ -280,7 +280,8 @@ describe 'vas_local_user' do
 #                                               :spectest => 'user1'}) }
 
         let (:facts) { default_facts.merge({:fqdn => 'vasdisabled-userkey.example.local',
-                                            :spectest => 'user1'}) }
+                                            :spectest => 'user1',
+                                            :vas_version => ''}) }
 
         it { should contain_user('user1') }
         it { should contain_user('user2') }
