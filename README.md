@@ -23,9 +23,11 @@ on systems with and without QAS installed.
 
 ## Module Description
 
-The module makes sure that this user is created before the system
-is connected to QAS on new installations. It does not manage the users and/or
-ssh_authorized_keys at all right now in cases where QAS is already installed.
+This module manages one or more local users and ssh_authorized_keys (if configured).
+If it's a newly provisioned system it will create the user or users before installing
+QAS. If QAS is already installed on the system it will only manage the user
+and its ssh_authorized_keys if libuser is supported. The user will be managed on
+systems without QAS too.
 
 ## Setup
 

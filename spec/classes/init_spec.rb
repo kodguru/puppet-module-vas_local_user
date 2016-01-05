@@ -57,7 +57,7 @@ describe 'vas_local_user' do
       it { should contain_user('user1').that_comes_before('Class[vas]') }
     end
 
-    context 'on system with VAS managed and installed' do
+    context 'on system with VAS managed and installed without libuser' do
       let :pre_condition do
         'class vas { }
         include vas'
@@ -72,6 +72,35 @@ describe 'vas_local_user' do
       end
 
       it { should_not contain_user('user1') }
+    end
+
+    context 'on system with VAS managed and installed with libuser' do
+      let :pre_condition do
+        'class vas { }
+        include vas'
+      end
+      let :facts do
+        default_facts.merge(
+          {
+            :fqdn => 'vasenabled.example.local',
+            :vas_version => '4.1.0.21518',
+            :vas_local_user_libuser => 'yes',
+          }
+        )
+      end
+
+      it do
+        should contain_user('user1').with(
+          {
+            'ensure'    => 'present',
+            'uid'         => '1001',
+            'gid'         => '100',
+            'home'        => '/var/lib/user1',
+            'managehome'  => 'true',
+            'forcelocal'  => 'true',
+          }
+        )
+      end
     end
 
     context 'on system without VAS managed but installed' do

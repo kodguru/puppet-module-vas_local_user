@@ -42,10 +42,10 @@ class vas_local_user(
 
     $defaults = {
       'managehome'  => true,
+      'forcelocal'  => true,
     }
 
     $vasdefaults = merge($defaults, {
-      'forcelocal'  => true,
       'before'      => Class['vas'],
     })
 
@@ -62,14 +62,28 @@ class vas_local_user(
       $vas_installed = false
     }
 
-    if $vas_managed and $vas_installed {
+    if $::vas_local_user_libuser == 'yes' {
+      $libuser_support = true
+    } else {
+      $libuser_support = false
     }
+
+    # VAS managed and installed with libuser support
+    if $vas_managed and $vas_installed and $libuser_support {
+      create_resources(user, $users_real, $vasdefaults)
+      $user_managed = true
+    }
+    # VAS managed but not (yet) installed
     elsif $vas_managed and ! $vas_installed {
       create_resources(user, $users_real, $vasdefaults)
       $user_managed = true
     }
-    elsif ! $vas_managed and $vas_installed {
+    # VAS not managed but installed with libuser support
+    elsif ! $vas_managed and $vas_installed and $libuser_support {
+      create_resources(user, $users_real, $defaults)
+      $user_managed = true
     }
+    # VAS neither managed or installed
     elsif ! $vas_managed and ! $vas_installed {
       create_resources(user, $users_real, $defaults)
       $user_managed = true
