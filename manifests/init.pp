@@ -1,11 +1,19 @@
 # == Class: vas_local_user
 #
 class vas_local_user(
+  $manage_users         = true,
   $users                = undef,
   $users_hiera_merge    = false,
   $ssh_keys             = undef,
   $ssh_keys_hiera_merge = false,
 ){
+
+  if is_string($manage_users) {
+    $manage_users_real = str2bool($manage_users)
+  } else {
+    $manage_users_real = $manage_users
+  }
+  validate_bool($manage_users_real)
 
   if is_string($users_hiera_merge) {
     $users_hiera_merge_real = str2bool($users_hiera_merge)
@@ -30,7 +38,7 @@ class vas_local_user(
     }
   }
 
-  if is_hash($users) {
+  if $manage_users_real and is_hash($users) {
 
     if $users_hiera_merge_real == true {
       $users_real = hiera_hash('vas_local_user::users')

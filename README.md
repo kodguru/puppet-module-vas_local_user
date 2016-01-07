@@ -44,12 +44,18 @@ The following defaults are used when creating a user.
 
 Not using QAS:
   'manage_home' => true
-
-Using QAS:
   'forcelocal'  => true
+
+Using QAS (settings above and...):
   'before'      => Class['vas']
 
 ## Usage
+
+### manage_users
+
+Boolean to control if this module should manage users or not.
+
+- *Default*: true
 
 ### users
 

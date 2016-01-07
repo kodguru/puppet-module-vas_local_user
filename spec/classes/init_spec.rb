@@ -29,6 +29,31 @@ describe 'vas_local_user' do
       }
     end
 
+    context 'with manage_users' do
+      ['false',false].each do |value|
+        context "set to #{value}" do
+          let :pre_condition do
+            'class vas { }
+            include vas'
+          end
+          let :params do
+            {
+              :manage_users => value,
+            }
+          end
+          let :facts do
+            default_facts.merge(
+              {
+                :fqdn => 'vasenabled.example.local'
+              }
+            )
+          end
+
+          it { should_not contain_user('user1') }
+        end
+      end
+    end
+
     context 'on system with VAS managed but not installed' do
       let :pre_condition do
         'class vas { }
