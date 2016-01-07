@@ -30,7 +30,7 @@ describe 'vas_local_user' do
     end
 
     context 'with manage_users' do
-      ['false',false].each do |value|
+      ['false', false].each do |value|
         context "set to #{value}" do
           let :pre_condition do
             'class vas { }
