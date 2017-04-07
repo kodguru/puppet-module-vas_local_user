@@ -37,6 +37,9 @@ class vas_local_user(
       $ssh_keys_real = $ssh_keys
     }
   }
+  else {
+    $ssh_keys_real = undef
+  }
 
   if $manage_users_real and is_hash($users) {
 
@@ -95,6 +98,9 @@ class vas_local_user(
     elsif ! $vas_managed and ! $vas_installed {
       create_resources(user, $users_real, $defaults)
       $user_managed = true
+    }
+    else {
+      $user_managed = false
     }
 
     if $user_managed == true and is_hash($ssh_keys_real) {
