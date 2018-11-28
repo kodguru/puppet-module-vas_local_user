@@ -18,7 +18,7 @@ Metrics/LineLength:
 
 # This is a good idea, but does not line up the rest of the lines making it
 # harder to read
-Style/IndentHash:
+Layout/IndentHash:
   Enabled: false
 
 Style/Next:
@@ -28,7 +28,10 @@ Style/Next:
 Style/NonNilCheck:
   Enabled: false
 
-Style/TrailingCommaInLiteral:
+Style/TrailingCommaInArrayLiteral:
+  Enabled: false
+
+Style/TrailingCommaInHashLiteral:
   Enabled: false
 
 # Cop's that require ruby >= 1.9
@@ -40,7 +43,7 @@ Style/BracesAroundHashParameters:
 
 # If enabled, this cop does not like the accessor method to start with 'get_',
 # with is a common pattern in the Puppet community.
-Style/AccessorMethodName:
+Naming/AccessorMethodName:
   Enabled: false
 
 # This is a common pattern in the Puppet community.
