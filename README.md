@@ -1,6 +1,6 @@
 # vas_local_user
 
-[![Build Status](https://api.travis-ci.org/anders-larsson/puppet-module-vas_local_user.png)](https://travis-ci.org/anders-larsson/puppet-module-vas_local_user)
+[![Build Status](https://api.travis-ci.org/gillarkod/puppet-module-vas_local_user.png)](https://travis-ci.org/gillarkod/puppet-module-vas_local_user)
 
 #### Table of Contents
 
