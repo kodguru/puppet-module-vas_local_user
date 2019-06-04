@@ -51,6 +51,21 @@ Using QAS (settings above and...):
 
 ## Usage
 
+### manage_package
+
+Boolean to control if this module should manage libuser package or not.
+
+- *Default*: USE_DEFAULTS (based on OS)
+
+manage_package is true on RedHat, CentOS, Debian, Ubuntu and OpenSuSE.
+
+### package_name
+
+String to control the package name managed by parameter 'manage_package'.
+
+- *Default*: libuser
+
+
 ### manage_users
 
 Boolean to control if this module should manage users or not.
