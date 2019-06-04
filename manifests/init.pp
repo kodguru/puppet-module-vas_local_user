@@ -1,12 +1,31 @@
 # == Class: vas_local_user
 #
 class vas_local_user(
+  $manage_package       = 'USE_DEFAULTS',
+  $package_name         = 'libuser',
   $manage_users         = true,
   $users                = undef,
   $users_hiera_merge    = false,
   $ssh_keys             = undef,
   $ssh_keys_hiera_merge = false,
 ){
+
+  if $manage_package == 'USE_DEFAULTS' {
+    case $::operatingsystem {
+      'RedHat', 'CentOS', 'Debian', 'Ubuntu', 'OpenSuSE': {
+        $manage_package_real = true
+      }
+    default: {
+        $manage_package_real = false
+      }
+    }
+  } else {
+    $manage_package_real = str2bool($manage_package)
+  }
+
+  if is_string($package_name) == false {
+    fail('vas_local_user::package_name is not a string')
+  }
 
   if is_string($manage_users) {
     $manage_users_real = str2bool($manage_users)
@@ -41,6 +60,18 @@ class vas_local_user(
     $ssh_keys_real = undef
   }
 
+  if $manage_package_real {
+    package { $package_name:
+      ensure => present,
+    }
+
+    $packagedefaults = {
+      'require' => Package[$package_name],
+    }
+  } else {
+    $packagedefaults = {}
+  }
+
   if $manage_users_real and is_hash($users) {
 
     if $users_hiera_merge_real == true {
@@ -56,10 +87,9 @@ class vas_local_user(
       'forcelocal'  => true,
     }
 
-    $vasdefaults = merge($defaults, {
-      'before'      => Class['vas'],
+    $vasdefaults = merge($defaults, $packagedefaults, {
+      'before' => Class['vas'],
     })
-
 
     if defined(Class['vas']) {
       $vas_managed = true
@@ -73,7 +103,7 @@ class vas_local_user(
       $vas_installed = false
     }
 
-    if $::vas_local_user_libuser == 'yes' {
+    if $::vas_local_user_libuser == 'yes' or defined(Package[$package_name]) {
       $libuser_support = true
     } else {
       $libuser_support = false

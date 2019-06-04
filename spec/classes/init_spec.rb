@@ -1,242 +1,214 @@
 require 'spec_helper'
 describe 'vas_local_user' do
-  let :default_facts do
-    {
-      :kernel                     => 'Linux',
-      :osfamily                   => 'RedHat',
-      :lsbmajdistrelease          => '6',
-      :operatingsystemmajrelease  => '6',
+  platforms = {
+    'RedHat' => {
+      :default_manage_package => true,
+    },
+    'Debian' => {
+      :default_manage_package => true,
+    },
+    'Ubuntu' => {
+      :default_manage_package => true,
+    },
+    'OpenSuSE' => {
+      :default_manage_package => true,
+    },
+    'SLES' => {
+      :default_manage_package => false,
     }
-  end
+  }
 
-  let(:facts) { default_facts }
+  user_params = {
+    :users => {
+      'user1' => {
+        'ensure' => 'present',
+        'uid' => '1001',
+        'gid' => '100',
+        'home' => '/var/lib/user1',
+      }
+    },
+    :ssh_keys => {
+      'user1' => {
+        'ensure' => 'present',
+        'user' => 'user1',
+        'type' => 'ssh-rsa',
+        'target' => '/var/lib/user1/.ssh/authorized_keys',
+        'key' => 'AAAAThisKeyIsNotValid',
+      }
+    }
+  }
 
   context 'with defaults for all parameters' do
-    it { should contain_class('vas_local_user') }
+    platforms.sort.each do |k, v|
+      context "where osfamily is <#{k}>" do
+        let :facts do
+          { :operatingsystem => k }
+        end
+
+        it { should contain_class('vas_local_user') }
+        it { should have_user_count(0) }
+
+        if v[:default_manage_package] == true
+          it { should contain_package('libuser') }
+        else
+          it { should_not contain_package('libuser') }
+        end
+      end
+    end
   end
 
-  describe 'with a single user \'user1\'' do
-    let :params do
-      {
-        :users => {
-          'user1' => {
-            'ensure'  => 'present',
-            'uid'     => '1001',
-            'gid'     => '100',
-            'home'    => '/var/lib/user1',
-          },
-        },
-      }
-    end
+  describe 'with defaults and one user in users and one in ssh_keys' do
+    platforms.sort.each do |k, _v|
+      let :default_facts do { :operatingsystem => k } end
 
-    context 'with manage_users' do
-      ['false', false].each do |value|
-        context "set to #{value}" do
-          let :pre_condition do
-            'class vas { }
-            include vas'
+      context "where osfamily is <#{k}>" do
+        let :facts do
+          default_facts
+        end
+
+        let :params do
+          user_params
+        end
+
+        context 'with manage_package' do
+          ['false', false].each do |value|
+            context "set to #{value}" do
+              let :pre_condition do
+                'class vas { }
+                include vas'
+              end
+              let :params do
+                {
+                  :manage_package => value,
+                }
+              end
+
+              it { should_not contain_package('libuser') }
+            end
           end
-          let :params do
-            {
-              :manage_users => value,
-            }
+        end
+
+        context 'with manage_users' do
+          ['false', false].each do |value|
+            context "set to #{value}" do
+              let :pre_condition do
+                'class vas { }
+                include vas'
+              end
+              let :params do
+                {
+                  :manage_users => value,
+                }
+              end
+
+              it { should_not contain_user('user1') }
+              it { should_not contain_ssh_authorized_key('user1') }
+            end
           end
+        end
+
+        context 'with VAS not installed' do
+          context 'and not managed' do
+            it { should contain_user('user1') }
+            it { should contain_ssh_authorized_key('user1') }
+          end
+
+          context 'and managed' do
+            let :pre_condition do
+              'class vas { }
+              include vas'
+            end
+
+            it { should contain_user('user1').that_comes_before('Class[vas]') }
+            it { should contain_user('user1').that_requires('Package[libuser]') }
+            it { should contain_ssh_authorized_key('user1') }
+          end
+        end
+
+        context 'with VAS installed' do
           let :facts do
             default_facts.merge(
               {
-                :fqdn => 'vasenabled.example.local'
+                :vas_version => '4.1.5.23233',
               }
             )
           end
 
-          it { should_not contain_user('user1') }
+          context 'and managed' do
+            let :pre_condition do
+              'class vas { }
+              include vas'
+            end
+
+            it { should contain_user('user1').that_comes_before('Class[vas]') }
+            it { should contain_user('user1').that_requires('Package[libuser]') }
+            it { should contain_ssh_authorized_key('user1') }
+          end
+
+          # Disable manage_package to ensure this state is fulfilled
+          context 'and not managed without libuser support' do
+            let :params do
+              user_params.merge(
+                {
+                  :manage_package => false,
+                }
+              )
+            end
+
+            let :facts do
+              default_facts.merge(
+                {
+                  :vas_version => '4.1.5.23233',
+                  :vas_local_user_libuser => 'no'
+                }
+              )
+            end
+
+            it { should_not contain_user('user1') }
+            it { should_not contain_ssh_authorized_key('user1') }
+          end
+
+          context 'and not managed with libuser support' do
+            let :facts do
+              default_facts.merge(
+                {
+                  :vas_version => '4.1.5.23233',
+                  :vas_local_user_libuser => 'yes'
+                }
+              )
+            end
+
+            it { should contain_user('user1') }
+            it { should contain_ssh_authorized_key('user1') }
+          end
         end
-      end
-    end
-
-    context 'on system with VAS managed but not installed' do
-      let :pre_condition do
-        'class vas { }
-        include vas'
-      end
-      let :facts do
-        default_facts.merge(
-          {
-            :fqdn => 'vasenabled.example.local'
-          }
-        )
-      end
-
-      it do
-        should contain_user('user1').with(
-          {
-            'ensure'    => 'present',
-            'uid'         => '1001',
-            'gid'         => '100',
-            'home'        => '/var/lib/user1',
-            'managehome'  => 'true',
-            'forcelocal'  => 'true',
-          }
-        )
-      end
-      it { should contain_user('user1').that_comes_before('Class[vas]') }
-    end
-
-    context 'on system with VAS managed and installed without libuser' do
-      let :pre_condition do
-        'class vas { }
-        include vas'
-      end
-      let :facts do
-        default_facts.merge(
-          {
-            :fqdn => 'vasenabled.example.local',
-            :vas_version => '4.1.0.21518'
-          }
-        )
-      end
-
-      it { should_not contain_user('user1') }
-    end
-
-    context 'on system with VAS managed and installed with libuser' do
-      let :pre_condition do
-        'class vas { }
-        include vas'
-      end
-      let :facts do
-        default_facts.merge(
-          {
-            :fqdn => 'vasenabled.example.local',
-            :vas_version => '4.1.0.21518',
-            :vas_local_user_libuser => 'yes',
-          }
-        )
-      end
-
-      it do
-        should contain_user('user1').with(
-          {
-            'ensure'    => 'present',
-            'uid'         => '1001',
-            'gid'         => '100',
-            'home'        => '/var/lib/user1',
-            'managehome'  => 'true',
-            'forcelocal'  => 'true',
-          }
-        )
-      end
-    end
-
-    context 'on system without VAS managed but installed' do
-      let :facts do
-        default_facts.merge(
-          {
-            :fqdn => 'vasenabled.example.local',
-            :vas_version => '4.1.0.21518'
-          }
-        )
-      end
-
-      it { should_not contain_user('user1') }
-    end
-
-    context 'on system without VAS' do
-      it do
-        should contain_user('user1').with(
-          {
-            'ensure'    => 'present',
-            'uid'         => '1001',
-            'gid'         => '100',
-            'home'        => '/var/lib/user1',
-            'managehome'  => 'true',
-          }
-        )
       end
     end
   end
 
-  describe 'with a single user \'user1\' and its ssh_authorized_key managed' do
+  let :default_facts do
+    { :operatingsystem => 'RedHat' }
+  end
+  let(:facts) { default_facts }
+
+  context 'with manage_package set to true and package_name set' do
+    let :facts do
+      default_facts
+    end
     let :params do
       {
-        :users    => {
-          'user1' => {
-            'ensure'  => 'present',
-            'uid'     => '1001',
-            'gid'     => '100',
-            'home'    => '/var/lib/user1',
-          },
-        },
-        :ssh_keys => {
-          'user1'   => {
-          'ensure'  => 'present',
-          'user'    => 'user1',
-          'type'    => 'ssh-rsa',
-          'target'  => '/var/lib/user1/.ssh/authorized_keys',
-          'key'     => 'AAAAThisKeyIsNotValid',
-          },
-        },
+        :manage_package => true,
+        :package_name => 'libuserpackage',
       }
     end
 
-    context 'on system with VAS managed but not installed' do
-      let :pre_condition do
-        'class vas { }
-        include vas'
-      end
-      let :facts do
-        default_facts.merge(
-          {
-            :fqdn => 'vasenabled.example.local'
-          }
-        )
-      end
-
-      it { should contain_user('user1') }
-      it { should contain_ssh_authorized_key('user1') }
-    end
-
-    context 'on system without VAS managed but installed' do
-      let :facts do
-        default_facts.merge(
-          {
-            :fqdn => 'vasenabled.example.local',
-            :vas_version => '4.1.0.21518'
-          }
-        )
-      end
-
-      it { should_not contain_user('user1') }
-      it { should_not contain_ssh_authorized_key('user1') }
-    end
-
-    context 'on system with VAS managed and installed' do
-      let :pre_condition do
-        'class vas { }
-        include vas'
-      end
-      let :facts do
-        default_facts.merge(
-          {
-            :fqdn => 'vasenabled.example.local',
-            :vas_version => '4.1.0.21518'
-          }
-        )
-      end
-
-      it { should_not contain_user('user1') }
-      it { should_not contain_ssh_authorized_key('user1') }
-    end
-
-    context 'on system without VAS' do
-      it { should contain_user('user1') }
-      it { should contain_ssh_authorized_key('user1') }
-    end
+    it { should contain_package('libuserpackage') }
+    it { should_not contain_package('libuser') }
   end
 
   describe 'hiera merge' do
     describe '"user1" and "user2" and user1\'s ssh_authorized_keys' do
-      context 'on system with VAS managed but not installed' do
+      context 'on system with VAS managed and not installed' do
         let :pre_condition do
           'class vas { }
           include vas'
@@ -253,44 +225,6 @@ describe 'vas_local_user' do
         it { should contain_user('user1') }
         it { should contain_user('user2') }
         it { should contain_ssh_authorized_key('user1') }
-        it { should_not contain_ssh_authorized_key('user2') }
-      end
-
-      context 'on system with VAS managed and installed' do
-        let :pre_condition do
-          'class vas { }
-          include vas'
-        end
-        let :facts do
-          default_facts.merge(
-            {
-              :fqdn => 'vasenabled-user.example.local',
-              :spectest => 'user1',
-              :vas_version => '4.1.0.21518'
-            }
-          )
-        end
-
-        it { should_not contain_user('user1') }
-        it { should_not contain_user('user2') }
-        it { should_not contain_ssh_authorized_key('user1') }
-        it { should_not contain_ssh_authorized_key('user2') }
-      end
-
-      context 'on system without VAS managed but installed' do
-        let :facts do
-          default_facts.merge(
-            {
-              :fqdn => 'vasenabled-user.example.local',
-              :spectest => 'user1',
-              :vas_version => '4.1.0.21518'
-            }
-          )
-        end
-
-        it { should_not contain_user('user1') }
-        it { should_not contain_user('user2') }
-        it { should_not contain_ssh_authorized_key('user1') }
         it { should_not contain_ssh_authorized_key('user2') }
       end
 
@@ -330,44 +264,6 @@ describe 'vas_local_user' do
         it { should contain_user('user2') }
         it { should contain_ssh_authorized_key('user1') }
         it { should contain_ssh_authorized_key('user2') }
-      end
-
-      context 'on system with VAS managed and installed' do
-        let :pre_condition do
-          'class vas { }
-          include vas'
-        end
-        let :facts do
-          default_facts.merge(
-            {
-              :fqdn => 'vasenabled-userkey.example.local',
-              :spectest => 'user1',
-              :vas_version => '4.1.0.21518'
-            }
-          )
-        end
-
-        it { should_not contain_user('user1') }
-        it { should_not contain_user('user2') }
-        it { should_not contain_ssh_authorized_key('user1') }
-        it { should_not contain_ssh_authorized_key('user2') }
-      end
-
-      context 'on system without VAS managed but installed' do
-        let :facts do
-          default_facts.merge(
-            {
-              :fqdn => 'vasenabled-userkey.example.local',
-              :spectest => 'user1',
-              :vas_version => '4.1.0.21518'
-            }
-          )
-        end
-
-        it { should_not contain_user('user1') }
-        it { should_not contain_user('user2') }
-        it { should_not contain_ssh_authorized_key('user1') }
-        it { should_not contain_ssh_authorized_key('user2') }
       end
 
       context 'on system without VAS' do
