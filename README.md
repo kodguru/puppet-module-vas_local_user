@@ -59,6 +59,8 @@ Boolean to control if this module should manage libuser package or not.
 
 manage_package is true on RedHat, CentOS, Debian, Ubuntu and OpenSuSE.
 
+There doesn't appear the libuser package is available on SLE[DS].
+
 ### package_name
 
 String to control the package name managed by parameter 'manage_package'.
